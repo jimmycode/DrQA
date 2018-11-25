@@ -59,7 +59,7 @@ def get_squad(file_path):
 
     paragraphs = []
     for doc_json in tqdm(dataset):
-        title = doc_json["title"]
+        title = utils.normalize(doc_json["title"])
 
         for idx, paragraph_json in enumerate(doc_json['paragraphs']):
             pid = "%s ### %d" % (title, idx)
@@ -90,7 +90,7 @@ def store_contents(squad_path, save_path, num_workers=None):
     paragraphs = get_squad(squad_path)
 
     for pid, text in tqdm(paragraphs):
-        c.executemany("INSERT INTO documents VALUES (?,?)", (pid, text))
+        c.execute("INSERT INTO documents VALUES (?,?)", (pid, text))
 
     logger.info('Read %d paragraphs.' % len(paragraphs))
     logger.info('Committing...')
