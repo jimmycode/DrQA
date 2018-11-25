@@ -25,7 +25,7 @@ class TfidfDocRanker(object):
     Scores new queries by taking sparse dot products.
     """
 
-    def __init__(self, tfidf_path=None, strict=True):
+    def __init__(self, tfidf_path=None, strict=False):
         """
         Args:
             tfidf_path: path to saved model file
@@ -73,8 +73,8 @@ class TfidfDocRanker(object):
         """Process a batch of closest_docs requests multithreaded.
         Note: we can use plain threads here as scipy is outside of the GIL.
         """
+        closest_docs = partial(self.closest_docs, k=k)
         with ThreadPool(num_workers) as threads:
-            closest_docs = partial(self.closest_docs, k=k)
             results = threads.map(closest_docs, queries)
         return results
 
