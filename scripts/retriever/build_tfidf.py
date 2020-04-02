@@ -28,7 +28,6 @@ console = logging.StreamHandler()
 console.setFormatter(fmt)
 logger.addHandler(console)
 
-
 # ------------------------------------------------------------------------------
 # Multiprocessing functions
 # ------------------------------------------------------------------------------
@@ -61,7 +60,7 @@ def tokenize(text):
 # ------------------------------------------------------------------------------
 
 
-def count(ngram, hash_size, doc_id):
+def count(ngram, hash_size, doc_id, dtype=np.uint16):
     """Fetch the text of a document and compute hashed ngrams counts."""
     global DOC2IDX
     row, col, data = [], [], []
@@ -79,8 +78,16 @@ def count(ngram, hash_size, doc_id):
     # Return in sparse matrix data format.
     row.extend(counts.keys())
     col.extend([DOC2IDX[doc_id]] * len(counts))
-    data.extend(counts.values())
+    data.extend(dtype(counts.values()))
     return row, col, data
+
+
+DTYPE_MAP = {
+    "np.uint8": np.uint8,
+    "np.uint16": np.uint16,
+    "np.uint32": np.uint32,
+    "np.uint64": np.uint64
+}
 
 
 def get_count_matrix(args, db, db_opts):
@@ -108,7 +115,7 @@ def get_count_matrix(args, db, db_opts):
     row, col, data = [], [], []
     step = max(int(len(doc_ids) / 10), 1)
     batches = [doc_ids[i:i + step] for i in range(0, len(doc_ids), step)]
-    _count = partial(count, args.ngram, args.hash_size)
+    _count = partial(count, args.ngram, args.hash_size, dtype=DTYPE_MAP[args.dtype])
     for i, batch in enumerate(batches):
         logger.info('-' * 25 + 'Batch %d/%d' % (i + 1, len(batches)) + '-' * 25)
         for b_row, b_col, b_data in workers.imap_unordered(_count, batch):
@@ -120,7 +127,7 @@ def get_count_matrix(args, db, db_opts):
 
     logger.info('Creating sparse matrix...')
     count_matrix = sp.csr_matrix(
-        (data, (row, col)), shape=(args.hash_size, len(doc_ids))
+        (data, (row, col)), shape=(args.hash_size, len(doc_ids)), dtype=DTYPE_MAP[args.dtype]
     )
     count_matrix.sum_duplicates()
     return count_matrix, (DOC2IDX, doc_ids)
@@ -176,6 +183,9 @@ if __name__ == '__main__':
                               "(e.g. 'corenlp')"))
     parser.add_argument('--num-workers', type=int, default=None,
                         help='Number of CPU processes (for tokenizing, etc)')
+    parser.add_argument('--dtype', type=str, default="np.uint16",
+                        choices=["np.uint8", "np.uint16", "np.uint32", "np.uint64"],
+                        help='dtype of sparse matrix (choose the minimum necessary to save memory)')
     args = parser.parse_args()
 
     logging.info('Counting words...')
