@@ -75,9 +75,9 @@ def count(ngram, hash_size, doc_id, dtype=np.uint16):
     counts = Counter([retriever.utils.hash(gram, hash_size) for gram in ngrams])
 
     # Return in sparse matrix data format.
-    row = np.array([np.uint32(k) for k in counts.keys()], dtype=np.uint32)  # Caveat: max hash size math.pow(2,32)=4.2B
+    row = np.array(list(counts.keys()), dtype=np.uint32)  # Caveat: max hash size math.pow(2,32)=4.2B
     col = np.array([DOC2IDX[doc_id]] * len(counts), np.uint32)  # Caveat: max number of document math.pow(2,32)=4.2B
-    data = np.array(counts.values(), dtype=dtype)  # use the specified dtype to save memory
+    data = np.array(list(counts.values()), dtype=dtype)  # use the specified dtype to save memory
     return row, col, data
 
 
