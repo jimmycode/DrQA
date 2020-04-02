@@ -176,7 +176,7 @@ if __name__ == '__main__':
     parser.add_argument('--num-workers', type=int, default=None,
                         help='Number of CPU processes (for tokenizing, etc)')
     parser.add_argument('--dtype', type=lambda x: eval(x), default=np.uint16,
-                        choices=["np.uint8", "np.uint16", "np.uint32", "np.uint64"],
+                        choices=[np.uint8, np.uint16, np.uint32, np.uint64],
                         help='dtype of sparse matrix (choose the minimum necessary to save memory)')
     args = parser.parse_args()
     logging.info("Arguments: %s" % str(args))
