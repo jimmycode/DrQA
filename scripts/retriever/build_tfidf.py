@@ -170,7 +170,7 @@ if __name__ == '__main__':
                         help='Directory for saving output files')
     parser.add_argument('--ngram', type=int, default=2,
                         help=('Use up to N-size n-grams (e.g. 2 = unigrams + bigrams)'))
-    parser.add_argument('--hash-size', type=lambda x: int(math.pow(2, x)), default=int(math.pow(2, 32)),
+    parser.add_argument('--hash-size', type=lambda x: int(math.pow(2, int(x))), default=int(math.pow(2, 32)),
                         help='Number of buckets to use for hashing ngrams')
     parser.add_argument('--tokenizer', type=str, default='simple',
                         help=("String option specifying tokenizer type to use (e.g. 'corenlp')"))
