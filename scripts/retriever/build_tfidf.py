@@ -63,7 +63,6 @@ def tokenize(text):
 def count(ngram, hash_size, doc_id, dtype=np.uint16):
     """Fetch the text of a document and compute hashed ngrams counts."""
     global DOC2IDX
-    row, col, data = [], [], []
     # Tokenize
     tokens = tokenize(retriever.utils.normalize(fetch_text(doc_id)))
 
@@ -76,9 +75,9 @@ def count(ngram, hash_size, doc_id, dtype=np.uint16):
     counts = Counter([retriever.utils.hash(gram, hash_size) for gram in ngrams])
 
     # Return in sparse matrix data format.
-    row.extend(counts.keys())
-    col.extend([DOC2IDX[doc_id]] * len(counts))
-    data.extend([dtype(v) for v in counts.values()])
+    row = np.array(counts.keys(), dtype=np.uint32)  # Caveat: max hash size math.pow(2,32)=4.2B
+    col = np.array([DOC2IDX[doc_id]] * len(counts), np.uint32)  # Caveat: max number of document math.pow(2,32)=4.2B
+    data = np.array(counts.values(), dtype=dtype)  # use the specified dtype to save memory
     return row, col, data
 
 
@@ -111,11 +110,15 @@ def get_count_matrix(args, db, db_opts):
     for i, batch in enumerate(batches):
         logger.info('-' * 25 + 'Batch %d/%d' % (i + 1, len(batches)) + '-' * 25)
         for b_row, b_col, b_data in workers.imap_unordered(_count, batch):
-            row.extend(b_row)
-            col.extend(b_col)
-            data.extend(b_data)
+            row.append(b_row)
+            col.append(b_col)
+            data.append(b_data)
     workers.close()
     workers.join()
+
+    row = np.concatenate(row)
+    col = np.concatenate(col)
+    data = np.concatenate(data)
 
     logger.info('Creating sparse matrix...')
     count_matrix = sp.csr_matrix(
