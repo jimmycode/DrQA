@@ -169,13 +169,11 @@ if __name__ == '__main__':
     parser.add_argument('out_dir', type=str, default=None,
                         help='Directory for saving output files')
     parser.add_argument('--ngram', type=int, default=2,
-                        help=('Use up to N-size n-grams '
-                              '(e.g. 2 = unigrams + bigrams)'))
-    parser.add_argument('--hash-size', type=int, default=int(math.pow(2, 32)),
+                        help=('Use up to N-size n-grams (e.g. 2 = unigrams + bigrams)'))
+    parser.add_argument('--hash-size', type=lambda x: int(math.pow(2, x)), default=int(math.pow(2, 32)),
                         help='Number of buckets to use for hashing ngrams')
     parser.add_argument('--tokenizer', type=str, default='simple',
-                        help=("String option specifying tokenizer type to use "
-                              "(e.g. 'corenlp')"))
+                        help=("String option specifying tokenizer type to use (e.g. 'corenlp')"))
     parser.add_argument('--num-workers', type=int, default=None,
                         help='Number of CPU processes (for tokenizing, etc)')
     parser.add_argument('--dtype', type=lambda x: eval(x), default=np.uint16,
