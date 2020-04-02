@@ -78,7 +78,7 @@ def count(ngram, hash_size, doc_id, dtype=np.uint16):
     # Return in sparse matrix data format.
     row.extend(counts.keys())
     col.extend([DOC2IDX[doc_id]] * len(counts))
-    data.extend(dtype(counts.values()))
+    data.extend([dtype(v) for v in counts.values()])
     return row, col, data
 
 
