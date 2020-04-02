@@ -181,6 +181,7 @@ if __name__ == '__main__':
                         choices=["np.uint8", "np.uint16", "np.uint32", "np.uint64"],
                         help='dtype of sparse matrix (choose the minimum necessary to save memory)')
     args = parser.parse_args()
+    print("Arguments: %s" % str(args))
 
     logging.info('Counting words...')
     count_matrix, doc_dict = get_count_matrix(
