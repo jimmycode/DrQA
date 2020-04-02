@@ -82,8 +82,6 @@ def count(ngram, hash_size, doc_id, dtype=np.uint16):
     return row, col, data
 
 
-
-
 def get_count_matrix(args, db, db_opts):
     """Form a sparse word to document count matrix (inverted index).
 
@@ -181,7 +179,7 @@ if __name__ == '__main__':
                         choices=["np.uint8", "np.uint16", "np.uint32", "np.uint64"],
                         help='dtype of sparse matrix (choose the minimum necessary to save memory)')
     args = parser.parse_args()
-    print("Arguments: %s" % str(args))
+    logging.info("Arguments: %s" % str(args))
 
     logging.info('Counting words...')
     count_matrix, doc_dict = get_count_matrix(
