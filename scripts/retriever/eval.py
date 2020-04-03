@@ -58,14 +58,12 @@ def has_answer(answer, doc_id, match):
     text = utils.normalize(text)
     if match == 'string':
         # Answer is a list of possible strings
-        text = PROCESS_TOK.tokenize(text).words(uncased=True)
+        text = " ".join(PROCESS_TOK.tokenize(text).words(uncased=True))
         for single_answer in answer:
             single_answer = utils.normalize(single_answer)
-            single_answer = PROCESS_TOK.tokenize(single_answer)
-            single_answer = single_answer.words(uncased=True)
-            for i in range(0, len(text) - len(single_answer) + 1):
-                if single_answer == text[i: i + len(single_answer)]:
-                    return True
+            single_answer = " ".join(PROCESS_TOK.tokenize(single_answer).words(uncased=True))
+            if single_answer in text:
+                return True
     elif match == 'regex':
         # Answer is a regex
         single_answer = utils.normalize(answer[0])
