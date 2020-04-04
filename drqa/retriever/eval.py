@@ -191,8 +191,8 @@ def eval(args):
     print(stats)
 
     del ranker
-    PROCESS_TOK = None
-    PROCESS_DB = None
+    processes.close()
+    processes.terminate()
 
     result = (sum(scores) / len(scores) * 100)  # return the final metric
     return result
