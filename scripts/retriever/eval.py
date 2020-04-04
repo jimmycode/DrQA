@@ -87,16 +87,22 @@ def get_score(answer_doc, match):
 # Main
 # ------------------------------------------------------------------------------
 
+class EVAL_ARGS():
+    def __init__(self, dataset, model, doc_db, ranker, k1=1.2, b=0.75,
+                 tokenizer='simple', n_docs=5, num_workers=None, match='string'):
+        self.dataset = dataset
+        self.model = model
+        self.doc_db = doc_db
+        self.ranker = ranker
+        self.k1 = k1
+        self.b = b
+        self.tokenizer = tokenizer
+        self.n_docs = n_docs
+        self.num_workers = num_workers
+        self.match = match
 
-if __name__ == '__main__':
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
-                            '%m/%d/%Y %I:%M:%S %p')
-    console = logging.StreamHandler()
-    console.setFormatter(fmt)
-    logger.addHandler(console)
 
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', type=str, default=None)
     parser.add_argument('--model', type=str, default=None)
@@ -112,13 +118,16 @@ if __name__ == '__main__':
     parser.add_argument('--match', type=str, default='string',
                         choices=['regex', 'string'])
     args = parser.parse_args()
-    logger.info('Arguments: %s' % str(args))
+    return args
 
+
+def eval(args):
+    logging.info('Arguments: %s' % str(args))
     # start time
     start = time.time()
 
     # read all the data and store it
-    logger.info('Reading data ...')
+    logging.info('Reading data ...')
     questions = []
     answers = []
     for line in open(args.dataset):
@@ -129,13 +138,13 @@ if __name__ == '__main__':
         answers.append(answer)
 
     # get the closest docs for each question.
-    logger.info('Initializing ranker...')
+    logging.info('Initializing ranker...')
     if args.ranker == 'tfidf':
         ranker = retriever.get_class('tfidf')(tfidf_path=args.model)
     elif args.ranker == 'bm25':
         ranker = retriever.get_class('bm25')(count_path=args.model, k1=args.k1, b=args.b)
 
-    logger.info('Ranking...')
+    logging.info('Ranking...')
     closest_docs = ranker.batch_closest_docs(
         questions, k=args.n_docs, num_workers=args.num_workers
     )
@@ -153,7 +162,7 @@ if __name__ == '__main__':
     )
 
     # compute the scores for each pair, and print the statistics
-    logger.info('Retrieving and computing scores...')
+    logging.info('Retrieving and computing scores...')
     get_score_partial = partial(get_score, match=args.match)
     scores = processes.map(get_score_partial, answers_docs)
 
@@ -173,5 +182,12 @@ if __name__ == '__main__':
         p=(sum(scores) / len(scores) * 100),
         t=time.time() - start,
     )
-
     print(stats)
+
+    result = (sum(scores) / len(scores) * 100)  # return the final metric
+    return result
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    eval(args)
