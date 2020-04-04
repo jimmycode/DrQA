@@ -112,6 +112,7 @@ if __name__ == '__main__':
     parser.add_argument('--match', type=str, default='string',
                         choices=['regex', 'string'])
     args = parser.parse_args()
+    logger.info('Arguments: %s' % str(args))
 
     # start time
     start = time.time()
