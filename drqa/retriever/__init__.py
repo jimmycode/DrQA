@@ -26,6 +26,8 @@ def set_default(key, value):
 def get_class(name):
     if name == 'tfidf':
         return TfidfDocRanker
+    if name == 'bm25':
+        return BM25DocRanker
     if name == 'sqlite':
         return DocDB
     if name == 'elasticsearch':
@@ -36,3 +38,4 @@ def get_class(name):
 from .doc_db import DocDB
 from .tfidf_doc_ranker import TfidfDocRanker
 from .elastic_doc_ranker import ElasticDocRanker
+from .bm25_doc_ranker import BM25DocRanker

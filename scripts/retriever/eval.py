@@ -102,6 +102,10 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default=None)
     parser.add_argument('--doc-db', type=str, default=None,
                         help='Path to Document DB')
+    parser.add_argument('--ranker', type=str, default=None, choices=['tfidf', 'bm25'])
+    parser.add_argument('--k1', type=float, default=1.2, help='Parameter k1 for BM25 ranker.')
+    parser.add_argument('--b', type=float, default=0.75, help='Parameter b for BM25 ranker.')
+
     parser.add_argument('--tokenizer', type=str, default='regexp')
     parser.add_argument('--n-docs', type=int, default=5)
     parser.add_argument('--num-workers', type=int, default=None)
@@ -125,7 +129,10 @@ if __name__ == '__main__':
 
     # get the closest docs for each question.
     logger.info('Initializing ranker...')
-    ranker = retriever.get_class('tfidf')(tfidf_path=args.model)
+    if args.ranker == 'tfidf':
+        ranker = retriever.get_class('tfidf')(tfidf_path=args.model)
+    elif args.ranker == 'bm25':
+        ranker = retriever.get_class('bm25')(count_path=args.model, k1=args.k1, b=args.b)
 
     logger.info('Ranking...')
     closest_docs = ranker.batch_closest_docs(
