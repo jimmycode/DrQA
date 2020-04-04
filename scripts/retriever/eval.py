@@ -19,6 +19,14 @@ from functools import partial
 from drqa import retriever, tokenizers
 from drqa.retriever import utils
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
+                        '%m/%d/%Y %I:%M:%S %p')
+console = logging.StreamHandler()
+console.setFormatter(fmt)
+logger.addHandler(console)
+
 # ------------------------------------------------------------------------------
 # Multiprocessing target functions.
 # ------------------------------------------------------------------------------
@@ -122,12 +130,12 @@ def parse_args():
 
 
 def eval(args):
-    logging.info('Arguments: %s' % str(args))
+    logger.info('Arguments: %s' % str(args))
     # start time
     start = time.time()
 
     # read all the data and store it
-    logging.info('Reading data ...')
+    logger.info('Reading data ...')
     questions = []
     answers = []
     for line in open(args.dataset):
@@ -138,13 +146,13 @@ def eval(args):
         answers.append(answer)
 
     # get the closest docs for each question.
-    logging.info('Initializing ranker...')
+    logger.info('Initializing ranker...')
     if args.ranker == 'tfidf':
         ranker = retriever.get_class('tfidf')(tfidf_path=args.model)
     elif args.ranker == 'bm25':
         ranker = retriever.get_class('bm25')(count_path=args.model, k1=args.k1, b=args.b)
 
-    logging.info('Ranking...')
+    logger.info('Ranking...')
     closest_docs = ranker.batch_closest_docs(
         questions, k=args.n_docs, num_workers=args.num_workers
     )
@@ -162,7 +170,7 @@ def eval(args):
     )
 
     # compute the scores for each pair, and print the statistics
-    logging.info('Retrieving and computing scores...')
+    logger.info('Retrieving and computing scores...')
     get_score_partial = partial(get_score, match=args.match)
     scores = processes.map(get_score_partial, answers_docs)
 
