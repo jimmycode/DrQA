@@ -146,9 +146,9 @@ def eval(args):
     # get the closest docs for each question.
     logger.info('Initializing ranker...')
     if args.ranker == 'tfidf':
-        ranker = retriever.get_class('tfidf')(tfidf_path=args.model)
+        ranker = retriever.get_class('tfidf')(tfidf_path=args.model, strict=False)
     elif args.ranker == 'bm25':
-        ranker = retriever.get_class('bm25')(count_path=args.model, k1=args.k1, b=args.b)
+        ranker = retriever.get_class('bm25')(count_path=args.model, k1=args.k1, b=args.b, strict=False)
 
     logger.info('Ranking...')
     closest_docs = ranker.batch_closest_docs(

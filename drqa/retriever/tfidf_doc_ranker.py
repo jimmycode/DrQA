@@ -76,6 +76,10 @@ class TfidfDocRanker(object):
         closest_docs = partial(self.closest_docs, k=k)
         with ThreadPool(num_workers) as threads:
             results = threads.map(closest_docs, queries)
+
+        if len(results) != len(queries):
+            logger.warning("Length of results does not match with queries.")
+
         return results
 
     def parse(self, query):
